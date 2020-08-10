@@ -1,0 +1,118 @@
+---
+title: "CENTRO DE ACOGIDA RESIDENCIAL PARA NIÑAS, NIÑOS Y ADOLESCENTES"
+author: "Reynaldo"
+date: "9/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r configuracion_inicial,echo=FALSE,comment=F,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(lubridate)# para manejar fechas
+library(stringr)
+library(ggalluvial) #grafico del analisis exploratoria very interesting
+library(parcats)
+library(easyalluvial)
+library(forcats)
+library(tint)
+library(extrafont)
+library(ggthemes)
+library(assertive)
+library(lubridate)
+library(janitor)
+
+
+#DATOS EXTRAIDOS DE https://www.datosabiertos.gob.pe/dataset/centro-de-acogida-residencial-para-ni%C3%B1as-ni%C3%B1os-y-adolescentes-car-nna-mimp
+setwd("E:/R clases/Taller manos a la data/mi tarea3")
+
+d1 <- read.csv("1.1.1 BdD_CAR_NNA_3.csv",sep=";")
+
+
+
+assert_all_are_in_past(d1$FECHA.DE.REPORTE.DE.LA.INFORMACIÓN)
+
+Fecha_reporte <- parse_date_time(d1$FECHA.DE.REPORTE.DE.LA.INFORMACIÓN,orders=c("%d/%m%/%y"))
+formats <- c("%d/%m%/%y")
+
+
+d1 <- d1 %>% mutate(Fecha_reporte = parse_date_time(FECHA.DE.REPORTE.DE.LA.INFORMACIÓN, formats))
+
+d1 <- d1[, c(36, 5, 7,10,11,12,13,14,c(17:35))]
+
+
+
+d1 <- rename(d1,PROGRAMA=NOMBRE.DEL.PROGRAMA,
+             INTERVENCION=NOMBRE.DE.LA.LINEA.DE.INTERVENCION,
+             UBIGEO= UBIGEO.DE.SU.UBICACIÓN.GEOGRÁFICA.SEGÚN.EL.INEI,
+             DEPARTAMENTO=DEPARTAMENTO.DEL.CENTRO.DE.ATENCIÓN,
+             PROVINCIA= PROVINCIA.DEL.CENTRO.DE.ATENCIÓN,
+             DISTRITO=DISTRITO.DEL.CENTRO.DE.ATENCIÓN,
+             TOTAL.DE.POBLACION.ATENDIDA=N..DE.POBLACION.ATENDIDA...TOTAL,
+       TOTAL_HOMBRES= N..DE.POBLACION.ATENDIDA...HOMBRES,
+       TOTAL_MUJERES= N..DE.POBLACION.ATENDIDA...MUJERES,
+       TOTAL_CON_1_AÑO=N..DE.POBLACION.ATENDIDA....1...TOTAL,
+       HOMBRES_1_AÑO =N..DE.POBLACION.ATENDIDA....1...HOMBRES,
+       MUJERES_1_AÑO =N..DE.POBLACION.ATENDIDA....1...MUJERES,
+       TOTAL_1_A_5_AÑOS=N..DE.POBLACION.ATENDIDA...1_5..TOTAL,
+       HOMBRES_1_A_5_AÑOS=N..DE.POBLACION.ATENDIDA...1_5...HOMBRES,
+       MUJERES_1_A_5_AÑOS=N..DE.POBLACION.ATENDIDA...1_5...MUJERES,
+       TOTAL_6_A_11_AÑOS=N..DE.POBLACION.ATENDIDA...6_11...TOTAL,
+       HOMBRES_6_A_11_AÑOS=N..DE.POBLACION.ATENDIDA...6_11...HOMBRES,
+       MUJERES_6_A_11_AÑOS=N..DE.POBLACION.ATENDIDA...6_11...MUJERES,
+       TOTAL_12_A_17_AÑOS =N..DE.POBLACION.ATENDIDA...12_17...TOTAL,
+       HOMBRES_12_A_17_AÑOS=N..DE.POBLACION.ATENDIDA...12_17...HOMBRES,
+       MUJERES_12_A_17_AÑOS=N..DE.POBLACION.ATENDIDA...12_17...MUJERES,
+       TOTAL_18_A_MAS =N..DE.POBLACION.ATENDIDA...18_MAS...TOTAL,
+       HOMBRES_18_A_MAS=N..DE.POBLACION.ATENDIDA...18_MAS...HOMBRES,
+       MUJERES_18_A_MAS=N..DE.POBLACION.ATENDIDA...18_MAS...MUJERES,
+       N_PERSONAS_REINSERTADAS=N..POBLACION.EN.REINSERCIÓN.FAMILIAR)
+
+
+
+d1[,c(9:27)] <- sapply(d1[,c(9:27)],function(x) round(as.numeric(as.character(x))) )
+
+d1$Fecha_reporte=as.Date(d1$Fecha_reporte)
+
+
+
+LIMA <-d1 %>% filter(DEPARTAMENTO=="LIMA")
+CUSCO <- d1 %>% filter(DEPARTAMENTO =="CUSCO")
+
+
+
+```
+
+
+## POBLACION ATENDIDA SEGUN ENTIDAD
+
+### CUSCO
+
+```{r grafico_general, echo=FALSE,fig.height=30,comment=F,warning=FALSE,message=FALSE,cache=TRUE}
+LIMA1 <- LIMA %>% select(Fecha_reporte,DEPARTAMENTO,PROVINCIA,DISTRITO, TOTAL.DE.POBLACION.ATENDIDA, N_PERSONAS_REINSERTADAS)
+ DT::datatable(LIMA1)
+CUSCO1 <- CUSCO %>% select(Fecha_reporte,DEPARTAMENTO,PROVINCIA,DISTRITO, TOTAL.DE.POBLACION.ATENDIDA, N_PERSONAS_REINSERTADAS)
+ DT::datatable(CUSCO1)
+
+theme_r <- theme(
+  plot.title = element_text(face = "italic", size = 16),
+  
+)
+
+Theme_c_r <- theme_classic()+theme_r
+
+ggplot(CUSCO1, aes(x=Fecha_reporte, y=TOTAL.DE.POBLACION.ATENDIDA,fill=DISTRITO))+geom_col()+
+  labs(title = "Poblacion atendida segun entidad", caption = "Fuente: Plataforma Nacional de datos abiertos")+
+  Theme_c_r
+  
+ggplot(LIMA1, aes(x=Fecha_reporte, y=TOTAL.DE.POBLACION.ATENDIDA,fill=DISTRITO))+geom_col()+
+  labs(title = "Poblacion atendida segun entidad", caption = "Fuente: Plataforma Nacional de datos abiertos")+
+  Theme_c_r
+```
