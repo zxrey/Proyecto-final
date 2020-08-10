@@ -1,6 +1,6 @@
 # Proyecto-final
 
-Alineado a la izquierda | Alineado en el centro | Alineado a la derecha |
+Variable | Tipo | Descripción |
 | :---         |     :---:      |          :---  |
 | Fecha_reporte  | Date    | Fecha de emision de la observacion    |
 | PROGRAMA    | Character       | Programa por el cual se intervino      |
