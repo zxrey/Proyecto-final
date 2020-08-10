@@ -78,7 +78,7 @@ d1[,c(9:27)] <- sapply(d1[,c(9:27)],function(x) round(as.numeric(as.character(x)
 sapply(d1, class)
 
 d1$Fecha_reporte=as.Date(d1$Fecha_reporte)
-
+d1$UBIGEO=as.character(d1$UBIGEO)
 
 
 LIMA <-d1 %>% filter(DEPARTAMENTO=="LIMA")
